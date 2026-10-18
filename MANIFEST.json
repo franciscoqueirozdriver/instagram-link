@@ -1,0 +1,91 @@
+{
+  "version": "1.0",
+  "date": "2026-10-16",
+  "status": "proposed_not_implemented",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "f9772b14962dfc8713aa9c425731179d580db14033e2d16a64d447a09a71f614"
+    },
+    {
+      "path": "docs/01-PRD.md",
+      "sha256": "5d5a721be71894cc211bacd139a93e63e07a6979b14b07b5c4d76d534838d93d"
+    },
+    {
+      "path": "docs/02-REQUISITOS.md",
+      "sha256": "25bfda88ef7357f025f10e44eb18714aeb04ee9c977bff3f2bdc27f074e3265c"
+    },
+    {
+      "path": "docs/03-REGRAS-DE-NEGOCIO.md",
+      "sha256": "41bfb92a6796ff5416a1ac7eca55008a5e0d30f4a8776b08cb6ed016809e96ff"
+    },
+    {
+      "path": "docs/04-ARQUITETURA.md",
+      "sha256": "da6ea0986735efc02d4ceb6d7ab6b51a48d809a595968a8bb65c87a457cad484"
+    },
+    {
+      "path": "docs/05-MODELO-DE-DADOS.md",
+      "sha256": "9cab6248b43f3c5e29f1d7b82ed70c6b74c189ef60f69f63ff484a45761f77a0"
+    },
+    {
+      "path": "docs/06-INTEGRACAO-META.md",
+      "sha256": "09686fe25ed11534d2975ed43d3c5a1a0ee7e1bd539424016e9e7743ef81f029"
+    },
+    {
+      "path": "docs/07-UX-E-TELAS.md",
+      "sha256": "28855978799773139b91d3e58054f434a1599d4b24a8582d7245fb34cd698e3d"
+    },
+    {
+      "path": "docs/08-SEGURANCA-E-PRIVACIDADE.md",
+      "sha256": "d653abe459dd0905e235adaa8e8291c0c741779843133022add9f66f1f30f3c7"
+    },
+    {
+      "path": "docs/09-PLANO-DE-EXECUCAO.md",
+      "sha256": "74ded718f262462088653090630678982f851385e939a940c9d32ad2a533356d"
+    },
+    {
+      "path": "docs/10-TESTES-E-HOMOLOGACAO.md",
+      "sha256": "61f358da2b102b5c437e19ea4cebd060f8f6e74bea90390ebdbc048a5485fe5d"
+    },
+    {
+      "path": "docs/11-DEPLOY-E-OPERACAO.md",
+      "sha256": "0af36c88682fbf667925bd3e07910fe0537caa908acfe7b229bee8744700faa4"
+    },
+    {
+      "path": "docs/12-CUSTOS-E-RISCOS.md",
+      "sha256": "01d0bb932cf12181dcd6b3eee3c914bac9676d707ea46341fc1ada51f8fe894b"
+    },
+    {
+      "path": "docs/13-INSTRUCOES-PARA-DESENVOLVIMENTO.md",
+      "sha256": "54c6fac6ddba4246fe97564b9325d46759ec0d102eea00da2d7149c59f02c0d4"
+    },
+    {
+      "path": "docs/14-FONTES-E-VALIDACAO.md",
+      "sha256": "e581524f9e9dbbf73cd5266f1cedf2d112fd434cdbf392cdc9ca31bcb81ccfc6"
+    },
+    {
+      "path": "spec/API.md",
+      "sha256": "cc346e79f9fb73fa38fd9f5d0afeb514b859f4fea9d36f5608d8e36bd8f04809"
+    },
+    {
+      "path": "spec/openapi.yaml",
+      "sha256": "e6a0250bd184b952f7e53c4787248038bc3418f15a8c01a7c8a7b41a796fa439"
+    },
+    {
+      "path": "templates/.env.example",
+      "sha256": "123cdc707f5f9c98a6128c72bdd1ff984b6cc7a4084bdb82ef0e210b78860dab"
+    },
+    {
+      "path": "templates/CHECKLIST-PRODUCAO.md",
+      "sha256": "e04268003ba8db31d741fb52133d8a4ab87d81b519b8867d1f23d7c5550bae7c"
+    },
+    {
+      "path": "templates/POLITICA-DE-PRIVACIDADE.md",
+      "sha256": "9db609ac0fd62dda782fbf9036c2e772ba71a0d8a939993da42880113eaa3908"
+    },
+    {
+      "path": "templates/REGISTRO-DE-DECISOES.md",
+      "sha256": "e131a75b11c32c4d10173b27f81dc38748f8a20c037cc20905501819479fe7a9"
+    }
+  ]
+}

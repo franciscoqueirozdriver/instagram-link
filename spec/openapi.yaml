@@ -1,0 +1,2419 @@
+openapi: 3.1.0
+info:
+  title: Instagram Link — contrato alvo MVP
+  version: 1.0.0
+  description: Contrato alvo do MVP. Rotas implementadas com Supabase Auth descritas
+    em openapi-m0.json e API.md. Integração Meta exige homologação M0.
+servers:
+- url: https://api.example.com
+security:
+- sessionCookie: []
+paths:
+  /api/v1/auth/login:
+    post:
+      operationId: login
+      summary: login
+      description: 'Papel permitido: público com rate limit. Ver spec/API.md para
+        semântica e estados. Cria cookie HttpOnly Secure; obter token CSRF por auth/me
+        conforme implementação.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+  /api/v1/auth/logout:
+    post:
+      operationId: logout
+      summary: logout
+      description: 'Papel permitido: autenticado. Ver spec/API.md para semântica e
+        estados.'
+      responses:
+        '204':
+          description: Sucesso
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+  /api/v1/auth/me:
+    get:
+      operationId: currentSession
+      summary: currentSession
+      description: 'Papel permitido: autenticado. Ver spec/API.md para semântica e
+        estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/v1/instagram/connect:
+    get:
+      operationId: instagramConnect
+      summary: instagramConnect
+      description: 'Papel permitido: admin. Ver spec/API.md para semântica e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authorization_url:
+                    type: string
+                    format: uri
+                required:
+                - authorization_url
+                additionalProperties: false
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/v1/instagram/callback:
+    get:
+      operationId: instagramCallback
+      summary: instagramCallback
+      description: 'Papel permitido: admin com sessão e state. Ver spec/API.md para
+        semântica e estados. Callback também deve tratar recusa OAuth com error/error_description;
+        code só é obrigatório no fluxo de sucesso.'
+      responses:
+        '303':
+          description: Redireciona ao painel sem token na URL
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: code
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: state
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: error
+        in: query
+        schema:
+          type: string
+      - name: error_description
+        in: query
+        schema:
+          type: string
+  /api/v1/instagram/connection:
+    get:
+      operationId: connectionStatus
+      summary: connectionStatus
+      description: 'Papel permitido: admin. Ver spec/API.md para semântica e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Connection'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/v1/instagram/disconnect:
+    post:
+      operationId: disconnect
+      summary: disconnect
+      description: 'Papel permitido: admin. Ver spec/API.md para semântica e estados.'
+      responses:
+        '204':
+          description: Sucesso
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: &id001
+          type: string
+          format: uuid
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+  /api/v1/products:
+    get:
+      operationId: listProduct
+      summary: listProduct
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPage'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - &id002
+        name: cursor
+        in: query
+        schema:
+          type: string
+      - &id003
+        name: limit
+        in: query
+        schema:
+          type: integer
+          default: 25
+          minimum: 1
+          maximum: 100
+    post:
+      operationId: createProduct
+      summary: createProduct
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+  /api/v1/products/{id}:
+    get:
+      operationId: getProduct
+      summary: getProduct
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+    patch:
+      operationId: updateProduct
+      summary: updateProduct
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductPatch'
+  /api/v1/campaigns:
+    get:
+      operationId: listCampaign
+      summary: listCampaign
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignPage'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - *id002
+      - *id003
+    post:
+      operationId: createCampaign
+      summary: createCampaign
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignInput'
+  /api/v1/campaigns/{id}:
+    get:
+      operationId: getCampaign
+      summary: getCampaign
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+    patch:
+      operationId: updateCampaign
+      summary: updateCampaign
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignPatch'
+  /api/v1/media:
+    get:
+      operationId: listMedia
+      summary: listMedia
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaPage'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - *id002
+      - *id003
+  /api/v1/media/sync:
+    post:
+      operationId: syncMedia
+      summary: syncMedia
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '202':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+  /api/v1/campaigns/{id}/simulate:
+    post:
+      operationId: simulateCampaign
+      summary: simulateCampaign
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResult'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationInput'
+  /api/v1/campaigns/{id}/activate:
+    post:
+      operationId: activateCampaign
+      summary: activateCampaign
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VersionAction'
+  /api/v1/campaigns/{id}/pause:
+    post:
+      operationId: pauseCampaign
+      summary: pauseCampaign
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VersionAction'
+  /api/v1/campaigns/{id}/archive:
+    post:
+      operationId: archiveCampaign
+      summary: archiveCampaign
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VersionAction'
+  /api/v1/history:
+    get:
+      operationId: listHistory
+      summary: listHistory
+      description: 'Papel permitido: admin/operator/viewer. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryItemPage'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - *id002
+      - *id003
+      - name: campaign_id
+        in: query
+        schema: *id001
+      - name: status
+        in: query
+        schema:
+          type: string
+      - name: from
+        in: query
+        schema: &id004
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        schema: *id004
+  /api/v1/dashboard:
+    get:
+      operationId: dashboard
+      summary: dashboard
+      description: 'Papel permitido: admin/operator/viewer. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: from
+        in: query
+        schema: *id004
+      - name: to
+        in: query
+        schema: *id004
+  /api/v1/operations/pause:
+    post:
+      operationId: pauseOperations
+      summary: pauseOperations
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationState'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+  /api/v1/operations/resume:
+    post:
+      operationId: resumeOperations
+      summary: resumeOperations
+      description: 'Papel permitido: admin/operator. Ver spec/API.md para semântica
+        e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationState'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+  /api/v1/audit:
+    get:
+      operationId: auditLog
+      summary: auditLog
+      description: 'Papel permitido: admin. Ver spec/API.md para semântica e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditItemPage'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - *id002
+      - *id003
+  /api/v1/shopee/credentials:
+    get:
+      operationId: getShopeeCredentialStatus
+      summary: Estado das credenciais Shopee da organização
+      description: Admin da organização; retorna apenas estado e datas, nunca App ID ou App Secret.
+      parameters:
+      - name: organization_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Estado sanitizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  configured:
+                    type: boolean
+                  configured_at:
+                    type: [string, 'null']
+                    format: date-time
+                  updated_at:
+                    type: [string, 'null']
+                    format: date-time
+                required: [configured, configured_at, updated_at]
+                additionalProperties: false
+        '401':
+          description: Sessão ausente ou inválida
+        '403':
+          description: Administrador não autorizado nesta organização
+    put:
+      operationId: saveShopeeCredentials
+      summary: Cadastrar ou substituir o par de credenciais da organização
+      description: Admin somente. App Secret é write-only e a resposta não contém credenciais.
+      parameters:
+      - name: organization_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                app_id:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                app_secret:
+                  type: string
+                  format: password
+                  writeOnly: true
+                  minLength: 1
+                  maxLength: 512
+              required: [app_id, app_secret]
+              additionalProperties: false
+      responses:
+        '200':
+          description: Credenciais cifradas e armazenadas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  configured:
+                    type: boolean
+                required: [configured]
+                additionalProperties: false
+        '401':
+          description: Sessão ausente ou inválida
+        '403':
+          description: Administrador não autorizado nesta organização
+        '422':
+          description: Campos inválidos
+  /api/v1/privacy/deletions:
+    post:
+      operationId: requestDeletion
+      summary: requestDeletion
+      description: 'Papel permitido: admin. Ver spec/API.md para semântica e estados.'
+      responses:
+        '202':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: *id001
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeletionInput'
+  /health/live:
+    get:
+      operationId: healthlive
+      summary: healthlive
+      description: 'Papel permitido: público. Ver spec/API.md para semântica e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                required:
+                - status
+                additionalProperties: false
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security: []
+  /health/ready:
+    get:
+      operationId: healthready
+      summary: healthready
+      description: 'Papel permitido: infra. Ver spec/API.md para semântica e estados.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                required:
+                - status
+                additionalProperties: false
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sessão ausente/inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflito de versão/idempotência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Limite de chamadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Dependência indisponível
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - infraKey: []
+  /webhooks/instagram:
+    get:
+      operationId: verifyWebhook
+      security: []
+      parameters:
+      - name: hub.mode
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: hub.verify_token
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: hub.challenge
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Challenge validado
+          content:
+            text/plain:
+              schema:
+                type: string
+        '403':
+          description: Verify token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      operationId: receiveWebhook
+      security: []
+      description: Assinatura obrigatória nos bytes brutos; formato Meta homologado
+        no M0. Não usar o evento normalizado como payload externo. Commit antes do
+        ACK.
+      parameters:
+      - name: X-Hub-Signature-256
+        in: header
+        required: true
+        schema:
+          type: string
+          pattern: ^sha256=[a-fA-F0-9]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Persistido ou duplicado autenticado
+        '403':
+          description: Assinatura inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: Payload excedeu limite
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Persistência indisponível
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+    infraKey:
+      type: apiKey
+      in: header
+      name: X-Infra-Key
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            request_id:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+          required:
+          - code
+          - message
+          - request_id
+          additionalProperties: false
+      required:
+      - error
+      additionalProperties: false
+    Link:
+      type: object
+      properties:
+        label:
+          type: string
+          minLength: 1
+          maxLength: 100
+        url:
+          type: string
+          format: uri
+          pattern: ^https://
+        position:
+          type: integer
+          minimum: 1
+      required:
+      - label
+      - url
+      - position
+      additionalProperties: false
+    ProductInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 160
+        description:
+          type: string
+          maxLength: 2000
+        links:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/Link'
+      required:
+      - name
+      - links
+      additionalProperties: false
+    Product:
+      type: object
+      properties:
+        id: *id001
+        name:
+          type: string
+        description:
+          type: string
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+        status:
+          type: string
+          enum:
+          - active
+          - inactive
+        version:
+          type: integer
+        created_at: *id004
+      required:
+      - id
+      - name
+      - links
+      - status
+      - version
+      additionalProperties: false
+    ProductPatch:
+      type: object
+      properties:
+        expected_version:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+          minLength: 1
+          maxLength: 160
+        description:
+          type: string
+          maxLength: 2000
+        links:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/Link'
+        status:
+          type: string
+          enum:
+          - active
+          - inactive
+      required:
+      - expected_version
+      additionalProperties: false
+    CampaignInput:
+      type: object
+      properties:
+        name: &id006
+          type: string
+          minLength: 1
+          maxLength: 160
+        media_id: *id001
+        product_id: *id001
+        keywords: &id007
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
+        match_mode: &id008
+          type: string
+          enum:
+          - whole_word
+          - phrase
+        template: &id009
+          type: string
+          minLength: 1
+        starts_at: &id005
+          type:
+          - string
+          - 'null'
+          format: date-time
+        ends_at: *id005
+      required:
+      - name
+      - media_id
+      - product_id
+      - keywords
+      - match_mode
+      - template
+      additionalProperties: false
+    CampaignPatch:
+      type: object
+      properties:
+        name: *id006
+        product_id: *id001
+        keywords: *id007
+        match_mode: *id008
+        template: *id009
+        starts_at: *id005
+        ends_at: *id005
+        expected_version:
+          type: integer
+          minimum: 1
+      required:
+      - expected_version
+      additionalProperties: false
+    Campaign:
+      type: object
+      properties:
+        id: *id001
+        name:
+          type: string
+        media_id: *id001
+        state:
+          type: string
+          enum:
+          - draft
+          - active
+          - paused
+          - archived
+        current_version:
+          type: integer
+        rendered_message:
+          type: string
+        activated_at: *id005
+        starts_at: *id005
+        ends_at: *id005
+      required:
+      - id
+      - name
+      - media_id
+      - state
+      - current_version
+      - rendered_message
+      additionalProperties: false
+    VersionAction:
+      type: object
+      properties:
+        expected_version:
+          type: integer
+          minimum: 1
+      required:
+      - expected_version
+      additionalProperties: false
+    SimulationInput:
+      type: object
+      properties:
+        text:
+          type: string
+          maxLength: 10000
+        expected_version:
+          type: integer
+          minimum: 1
+      required:
+      - text
+      - expected_version
+      additionalProperties: false
+    SimulationResult:
+      type: object
+      properties:
+        matches:
+          type: boolean
+        reason_code:
+          type: string
+        rendered_message:
+          type: string
+        external_request_sent:
+          type: boolean
+          const: false
+      required:
+      - matches
+      - reason_code
+      - rendered_message
+      - external_request_sent
+      additionalProperties: false
+    Media:
+      type: object
+      properties:
+        id: *id001
+        ig_media_id:
+          type: string
+        type:
+          type: string
+        permalink:
+          type: string
+          format: uri
+        timestamp: *id004
+      required:
+      - id
+      - ig_media_id
+      - type
+      additionalProperties: false
+    Connection:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - pending
+          - connected
+          - expiring
+          - reconnect_required
+          - disconnected
+        username:
+          type:
+          - string
+          - 'null'
+        expires_at: *id005
+        scopes:
+          type: array
+          items:
+            type: string
+        api_version:
+          type: string
+      required:
+      - status
+      - scopes
+      - api_version
+      additionalProperties: false
+    User:
+      type: object
+      properties:
+        id: *id001
+        email:
+          type: string
+          format: email
+        organization_id: *id001
+        role:
+          type: string
+          enum:
+          - admin
+          - operator
+          - viewer
+      required:
+      - id
+      - email
+      - organization_id
+      - role
+      additionalProperties: false
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - password
+      additionalProperties: false
+    HistoryItem:
+      type: object
+      properties:
+        id: *id001
+        campaign_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        comment_id:
+          type: string
+        status:
+          type: string
+        reason_code:
+          type:
+          - string
+          - 'null'
+        received_at: *id004
+        provider_message_id:
+          type:
+          - string
+          - 'null'
+      required:
+      - id
+      - comment_id
+      - status
+      - received_at
+      additionalProperties: false
+    Dashboard:
+      type: object
+      properties:
+        received:
+          type: integer
+        eligible:
+          type: integer
+        accepted:
+          type: integer
+        failed:
+          type: integer
+        unknown:
+          type: integer
+        queued:
+          type: integer
+        paused:
+          type: boolean
+      required:
+      - received
+      - eligible
+      - accepted
+      - failed
+      - unknown
+      - queued
+      - paused
+      additionalProperties: false
+    AuditItem:
+      type: object
+      properties:
+        id: *id001
+        action:
+          type: string
+        target_id:
+          type: string
+        created_at: *id004
+        actor_id: *id001
+      required:
+      - id
+      - action
+      - target_id
+      - created_at
+      additionalProperties: false
+    Job:
+      type: object
+      properties:
+        job_id: *id001
+        status:
+          type: string
+      required:
+      - job_id
+      - status
+      additionalProperties: false
+    OperationState:
+      type: object
+      properties:
+        paused:
+          type: boolean
+        held_jobs:
+          type: integer
+          minimum: 0
+      required:
+      - paused
+      - held_jobs
+      additionalProperties: false
+    DeletionInput:
+      type: object
+      properties:
+        account_id: *id001
+        subject_ref:
+          type: string
+          minLength: 1
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - account_id
+      - subject_ref
+      - reason
+      additionalProperties: false
+    ProductPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        next_cursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - next_cursor
+      additionalProperties: false
+    CampaignPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Campaign'
+        next_cursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - next_cursor
+      additionalProperties: false
+    MediaPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Media'
+        next_cursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - next_cursor
+      additionalProperties: false
+    HistoryItemPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryItem'
+        next_cursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - next_cursor
+      additionalProperties: false
+    AuditItemPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditItem'
+        next_cursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - next_cursor
+      additionalProperties: false
+    Session:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        csrf_token:
+          type: string
+      required:
+      - user
+      - csrf_token
+      additionalProperties: false

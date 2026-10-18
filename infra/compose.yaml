@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:16.13
+    environment:
+      POSTGRES_DB: instagram_link
+      POSTGRES_USER: instagram_link
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U instagram_link -d instagram_link"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  pgdata:
